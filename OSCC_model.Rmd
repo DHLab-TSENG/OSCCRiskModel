@@ -1,0 +1,664 @@
+---
+title: "Machine Learning-Based Risk Prediction Models of Oral Squamous Cell Carcinoma Using Saliva Autoantibody Biomarkers"
+output: github_document
+author: "Yi-Ju Tseng, Yi-Cheng Wang, Pei-Chun Hsueh and Chih-Ching Wu"
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load packages and data
+```{r, warning=FALSE,message = FALSE}
+source("libAndData.R")
+SeedList <- c(4321:4420)
+```
+
+## Data process and model development
+
+Parallel processing
+```{r}
+cpu.core<-parallel::detectCores()
+cl <- makeCluster(cpu.core)
+registerDoParallel(cl)
+```
+
+### Data processing strategy 1 (MFI : Original; Age : Original)
+
+```{r}
+AutoAb$Age<- AutoAb$AgeOri
+```
+
+```{r OO, warning=F, message=F,cache=TRUE}
+xgb_model <- map(SeedList, function(x) xgb_result(AutoAb,x,FALSE))
+RF_model <- map(SeedList, function(x) RF_result(AutoAb,x,FALSE))
+LR_model <- map(SeedList, function(x) LR_result(AutoAb,x,FALSE))
+svm_model <- map(SeedList, function(x) svm_result(AutoAb,x,FALSE))
+```
+
+```{r OOstk, warning=F, message=F,cache=TRUE}
+stk_model <- map(SeedList, function(x) stk_result(AutoAb,x,FALSE))
+```
+
+```{r}
+resultOutput(xgb_model,"XGBoost","OO")
+resultOutput(RF_model,"RF","OO")
+resultOutput(LR_model,"LR","OO")
+resultOutput(svm_model,"SVM","OO")
+resultOutput(stk_model,"Stacking","OO")
+```
+
+### Data processing strategy 2 (MFI : Original; Age : Binary)
+Convert age to binary format
+```{r}
+AutoAb$Age<- AutoAb$AgeB 
+```
+
+```{r OB, warning=F, message=F,cache=TRUE}
+xgb_model <- map(SeedList, function(x) xgb_result(AutoAb,x,FALSE))
+RF_model <- map(SeedList, function(x) RF_result(AutoAb,x,FALSE))
+LR_model <- map(SeedList, function(x) LR_result(AutoAb,x,FALSE))
+svm_model <- map(SeedList, function(x) svm_result(AutoAb,x,FALSE))
+```
+
+```{r OBstk, warning=F, message=F,cache=TRUE}
+stk_model <- map(SeedList, function(x) stk_result(AutoAb,x,FALSE))
+```
+
+```{r}
+resultOutput(xgb_model,"XGBoost","OB")
+resultOutput(RF_model,"RF","OB")
+resultOutput(LR_model,"LR","OB")
+resultOutput(svm_model,"SVM","OB")
+resultOutput(stk_model,"Stacking","OB")
+```
+
+
+### Data processing strategy 3 (MFI : Original; Age : Ternary)
+Convert age to ternary format
+```{r}
+AutoAb$Age<- AutoAb$AgeT
+```
+
+```{r OT, warning=F, message=F,cache=TRUE}
+xgb_model <- map(SeedList, function(x) xgb_result(AutoAb,x,FALSE))
+RF_model <- map(SeedList, function(x) RF_result(AutoAb,x,FALSE))
+LR_model <- map(SeedList, function(x) LR_result(AutoAb,x,FALSE))
+svm_model <- map(SeedList, function(x) svm_result(AutoAb,x,FALSE))
+```
+
+```{r OTstk, warning=F, message=F,cache=TRUE}
+stk_model <- map(SeedList, function(x) stk_result(AutoAb,x,FALSE))
+```
+
+```{r}
+resultOutput(xgb_model,"XGBoost","OT")
+resultOutput(RF_model,"RF","OT")
+resultOutput(LR_model,"LR","OT")
+resultOutput(svm_model,"SVM","OT")
+resultOutput(stk_model,"Stacking","OT")
+```
+
+
+### Data processing strategy 4 (MFI : Binary; Age : Original)
+
+```{r}
+AutoAb$Age<- AutoAb$AgeOri 
+```
+
+```{r BO, warning=F, message=F,cache=TRUE}
+xgb_model <- map(SeedList, function(x) xgb_result(AutoAb,x,TRUE))
+RF_model <- map(SeedList, function(x) RF_result(AutoAb,x,TRUE))
+LR_model <- map(SeedList, function(x) LR_result(AutoAb,x,TRUE))
+svm_model <- map(SeedList, function(x) svm_result(AutoAb,x,TRUE))
+```
+
+```{r BOstk, warning=F, message=F,cache=TRUE}
+stk_model <- map(SeedList, function(x) stk_result(AutoAb,x,TRUE))
+```
+
+```{r}
+resultOutput(xgb_model,"XGBoost","BO")
+resultOutput(RF_model,"RF","BO")
+resultOutput(LR_model,"LR","BO")
+resultOutput(svm_model,"SVM","BO")
+resultOutput(stk_model,"Stacking","BO")
+```
+
+### Data processing strategy 5 (MFI : Binary; Age : Binary)
+
+Convert age to binary format
+```{r}
+AutoAb$Age<- AutoAb$AgeB
+```
+
+```{r BB, warning=F, message=F,cache=TRUE}
+xgb_model <- map(SeedList, function(x) xgb_result(AutoAb,x,TRUE))
+RF_model <- map(SeedList, function(x) RF_result(AutoAb,x,TRUE))
+LR_model <- map(SeedList, function(x) LR_result(AutoAb,x,TRUE))
+svm_model <- map(SeedList, function(x) svm_result(AutoAb,x,TRUE))
+```
+
+```{r BBstk, warning=F, message=F,cache=TRUE}
+stk_model <- map(SeedList, function(x) stk_result(AutoAb,x,TRUE))
+```
+
+```{r}
+resultOutput(xgb_model,"XGBoost","BB")
+resultOutput(RF_model,"RF","BB")
+resultOutput(LR_model,"LR","BB")
+resultOutput(svm_model,"SVM","BB")
+resultOutput(stk_model,"Stacking","BB")
+```
+
+
+
+### Data processing strategy 6 (MFI : Binary; Age : Ternary)
+Convert age to ternary format
+```{r}
+AutoAb$Age <- AutoAb$AgeT # Age = ternary
+```
+
+```{r BT, warning=F, message=F,cache=TRUE}
+xgb_model <- map(SeedList, function(x) xgb_result(AutoAb,x,TRUE))
+RF_model <- map(SeedList, function(x) RF_result(AutoAb,x,TRUE))
+LR_model <- map(SeedList, function(x) LR_result(AutoAb,x,TRUE))
+svm_model <- map(SeedList, function(x) svm_result(AutoAb,x,TRUE))
+```
+
+```{r BTstk, warning=F, message=F,cache=TRUE}
+stk_model <- map(SeedList, function(x) stk_result(AutoAb,x,TRUE))
+```
+
+```{r}
+resultOutput(xgb_model,"XGBoost","BT")
+resultOutput(RF_model,"RF","BT")
+resultOutput(LR_model,"LR","BT")
+resultOutput(svm_model,"SVM","BT")
+resultOutput(stk_model,"Stacking","BT")
+```
+
+
+### Data processing strategy 7 (MFI : Logarithm; Age : Original)
+Use common log-transformed MFI level
+```{r}
+AutoAb$Age<- AutoAb$AgeOri 
+
+AutoAb$ANXA2 <- AutoAb$ANXA2Log
+AutoAb$CA2 <- AutoAb$CA2Log
+AutoAb$HSPA5 <- AutoAb$HSPA5Log
+AutoAb$ISG15 <- AutoAb$ISG15Log
+AutoAb$KNG1 <- AutoAb$KNG1Log
+AutoAb$MMP1 <- AutoAb$MMP1Log
+AutoAb$MMP3 <- AutoAb$MMP3Log
+AutoAb$p53 <- AutoAb$p53Log
+AutoAb$PRDX2 <- AutoAb$PRDX2Log
+AutoAb$SPARC <- AutoAb$SPARCLog #log10
+```
+
+```{r LO, warning=F, message=F,cache=TRUE}
+xgb_model <- map(SeedList, function(x) xgb_result(AutoAb,x,FALSE))
+RF_model <- map(SeedList, function(x) RF_result(AutoAb,x,FALSE))
+LR_model <- map(SeedList, function(x) LR_result(AutoAb,x,FALSE))
+svm_model <- map(SeedList, function(x) svm_result(AutoAb,x,FALSE))
+```
+
+```{r LOstk, warning=F, message=F,cache=TRUE}
+stk_model <- map(SeedList, function(x) stk_result(AutoAb,x,FALSE))
+```
+
+```{r}
+resultOutput(xgb_model,"XGBoost","LO")
+resultOutput(RF_model,"RF","LO")
+resultOutput(LR_model,"LR","LO")
+resultOutput(svm_model,"SVM","LO")
+resultOutput(stk_model,"Stacking","LO")
+```
+
+
+
+#### Figure. Lift and Calibration curve
+```{r, fig.width=9,fig.height=7,warning=F,message=F}
+stk_perf<-map_dfr(stk_model,3)
+stk_perf$Seed<-1:length(SeedList)
+stk_perf$realSeed<-SeedList
+bestSeed<-stk_perf %>% arrange(desc(ROC)) %>% pull(Seed)
+bestRealSeed<-stk_perf %>% arrange(desc(ROC)) %>% pull(realSeed)
+print(paste0("The best seed: ",bestRealSeed[1]))
+lift_results<-data.frame(Class=stk_model[[bestSeed[1]]]$Tst$Diagnosis,
+                         XGBoost=xgb_model[[bestSeed[1]]]$Tst$H,
+                         RF=RF_model[[bestSeed[1]]]$Tst$H,
+                         SVM=svm_model[[bestSeed[1]]]$Tst$H,
+                         LR=LR_model[[bestSeed[1]]]$Tst$H,
+                         Stacking=stk_model[[bestSeed[1]]]$Tst$.pred_H)
+lift_results$Class<-factor(lift_results$Class,levels = c("H","L"))
+trellis.par.set(caretTheme())
+lift_obj <- caret::lift(Class ~ XGBoost + RF + SVM+LR+Stacking, data = lift_results)
+ggplot(lift_obj)+theme_bw()
+ggsave("GainLO.pdf",device="pdf",width = 7,height = 5)
+
+ggplot(lift_obj$data) +
+  geom_line(aes(CumTestedPct, lift, color = liftModelVar))+
+  geom_hline(yintercept = 1, linetype='dotted')+
+  theme_bw()+
+  labs(color="Methods",x="% Tested",y="Lift")
+ggsave("LiftLO.pdf",device="pdf",width = 7,height = 5)
+
+two_class_lift <- lift_results %>% 
+  pivot_longer(XGBoost:Stacking) %>%
+  group_by(name)%>%
+  lift_curve(Class, value) 
+lift_data<-two_class_lift %>%
+  group_by(name,.percent_tested = cut_interval(.percent_tested, n = 20)) %>%
+  summarise(.lift = mean(.lift, na.rm = TRUE)) 
+lift_data %>% filter(.percent_tested=="[0,5]")
+lift_data %>%
+  ggplot(aes(.percent_tested, .lift)) +
+  geom_col() +
+  geom_hline(yintercept = 1, linetype='dotted')+
+  theme_bw() +
+  facet_grid(name~.)+
+  labs(x = "% Tested", y = "Lift")
+ggsave("LiftLOBar.pdf",device="pdf",width = 8,height = 6)
+
+trellis.par.set(caretTheme())
+cal_obj <- calibration(Class ~ XGBoost + RF + SVM+LR+Stacking,
+                       data = lift_results,
+                       cuts = 7)
+pdf("CalLO.pdf",width = 7,height = 5)
+plot(cal_obj, type = "l", auto.key = list(columns = 4,
+                                          lines = TRUE,
+                                          points = FALSE))
+dev.off() 
+plot(cal_obj, type = "l", auto.key = list(columns = 4,
+                                          lines = TRUE,
+                                          points = FALSE))
+```
+
+#### Brier Score
+```{r}
+
+o_t = 2-as.numeric(lift_results$Class)
+data.frame(Algorithm=c("Stacking","XGBoost","Random Forest","SVM","Logistic Regression"),
+           BrierScore=c(mean((lift_results$Stacking - o_t)^2),
+                        mean((lift_results$XGBoost - o_t)^2),
+                        mean((lift_results$RF - o_t)^2),
+                        mean((lift_results$SVM - o_t)^2),
+                        mean((lift_results$LR - o_t)^2))) %>%
+  mutate(BrierScore=round(BrierScore,3)) %>%
+  knitr::kable()
+
+```
+
+
+
+### Data processing strategy 8 (MFI : Logarithm; Age : Binary)
+Convert age to binary format and use common log-transformed MFI level
+```{r}
+AutoAb$Age<- AutoAb$AgeB
+AutoAb$ANXA2 <- AutoAb$ANXA2Log
+AutoAb$CA2 <- AutoAb$CA2Log
+AutoAb$HSPA5 <- AutoAb$HSPA5Log
+AutoAb$ISG15 <- AutoAb$ISG15Log
+AutoAb$KNG1 <- AutoAb$KNG1Log
+AutoAb$MMP1 <- AutoAb$MMP1Log
+AutoAb$MMP3 <- AutoAb$MMP3Log
+AutoAb$p53 <- AutoAb$p53Log
+AutoAb$PRDX2 <- AutoAb$PRDX2Log
+AutoAb$SPARC <- AutoAb$SPARCLog #log10
+```
+
+```{r LB, warning=F, message=F,cache=TRUE}
+xgb_model <- map(SeedList, function(x) xgb_result(AutoAb,x,FALSE))
+RF_model <- map(SeedList, function(x) RF_result(AutoAb,x,FALSE))
+LR_model <- map(SeedList, function(x) LR_result(AutoAb,x,FALSE))
+svm_model <- map(SeedList, function(x) svm_result(AutoAb,x,FALSE))
+```
+
+```{r LBstk, warning=F, message=F,cache=TRUE}
+stk_model <- map(SeedList, function(x) stk_result(AutoAb,x,FALSE))
+```
+
+```{r}
+resultOutput(xgb_model,"XGBoost","LB")
+resultOutput(RF_model,"RF","LB")
+resultOutput(LR_model,"LR","LB")
+resultOutput(svm_model,"SVM","LB")
+resultOutput(stk_model,"Stacking","LB")
+```
+
+
+### Data processing strategy 9 (MFI : Logarithm; Age : Ternary)
+Convert age to ternary format and use common log-transformed MFI level
+```{r}
+AutoAb$Age <- AutoAb$AgeT # Age = ternary
+AutoAb$ANXA2 <- AutoAb$ANXA2Log
+AutoAb$CA2 <- AutoAb$CA2Log
+AutoAb$HSPA5 <- AutoAb$HSPA5Log
+AutoAb$ISG15 <- AutoAb$ISG15Log
+AutoAb$KNG1 <- AutoAb$KNG1Log
+AutoAb$MMP1 <- AutoAb$MMP1Log
+AutoAb$MMP3 <- AutoAb$MMP3Log
+AutoAb$p53 <- AutoAb$p53Log
+AutoAb$PRDX2 <- AutoAb$PRDX2Log
+AutoAb$SPARC <- AutoAb$SPARCLog #log10
+```
+
+```{r LT, warning=F, message=F,cache=TRUE}
+xgb_model <- map(SeedList, function(x) xgb_result(AutoAb,x,FALSE))
+RF_model <- map(SeedList, function(x) RF_result(AutoAb,x,FALSE))
+LR_model <- map(SeedList, function(x) LR_result(AutoAb,x,FALSE))
+svm_model <- map(SeedList, function(x) svm_result(AutoAb,x,FALSE))
+```
+
+```{r LTstk, warning=F, message=F,cache=TRUE}
+stk_model <- map(SeedList, function(x) stk_result(AutoAb,x,FALSE))
+```
+
+```{r}
+resultOutput(xgb_model,"XGBoost","LT")
+resultOutput(RF_model,"RF","LT")
+resultOutput(LR_model,"LR","LT")
+resultOutput(svm_model,"SVM","LT")
+resultOutput(stk_model,"Stacking","LT")
+```
+
+
+
+### Data processing strategy 10 (MFI : Standardized; Age : Original)
+Standardize MFI level
+```{r}
+AutoAb$Age<- AutoAb$AgeOri 
+AutoAb$ANXA2 <- AutoAb$ANXA2Std
+AutoAb$CA2 <- AutoAb$CA2Std
+AutoAb$HSPA5 <- AutoAb$HSPA5Std
+AutoAb$ISG15 <- AutoAb$ISG15Std
+AutoAb$KNG1 <- AutoAb$KNG1Std
+AutoAb$MMP1 <- AutoAb$MMP1Std
+AutoAb$MMP3 <- AutoAb$MMP3Std
+AutoAb$p53 <- AutoAb$p53Std
+AutoAb$PRDX2 <- AutoAb$PRDX2Std
+AutoAb$SPARC <- AutoAb$SPARCStd #scale
+```
+
+```{r SO, warning=F, message=F,cache=TRUE}
+xgb_model <- map(SeedList, function(x) xgb_result(AutoAb,x,FALSE))
+RF_model <- map(SeedList, function(x) RF_result(AutoAb,x,FALSE))
+LR_model <- map(SeedList, function(x) LR_result(AutoAb,x,FALSE))
+svm_model <- map(SeedList, function(x) svm_result(AutoAb,x,FALSE))
+```
+
+```{r SOstk, warning=F, message=F,cache=TRUE}
+stk_model <- map(SeedList, function(x) stk_result(AutoAb,x,FALSE))
+```
+
+```{r}
+resultOutput(xgb_model,"XGBoost","SO")
+resultOutput(RF_model,"RF","SO")
+resultOutput(LR_model,"LR","SO")
+resultOutput(svm_model,"SVM","SO")
+resultOutput(stk_model,"Stacking","SO")
+```
+
+### Data processing strategy 11 (MFI : Standardized; Age : Binary)
+Convert age to binary format and standardize MFI level
+```{r}
+AutoAb$Age<- AutoAb$AgeB
+AutoAb$ANXA2 <- AutoAb$ANXA2Std
+AutoAb$CA2 <- AutoAb$CA2Std
+AutoAb$HSPA5 <- AutoAb$HSPA5Std
+AutoAb$ISG15 <- AutoAb$ISG15Std
+AutoAb$KNG1 <- AutoAb$KNG1Std
+AutoAb$MMP1 <- AutoAb$MMP1Std
+AutoAb$MMP3 <- AutoAb$MMP3Std
+AutoAb$p53 <- AutoAb$p53Std
+AutoAb$PRDX2 <- AutoAb$PRDX2Std
+AutoAb$SPARC <- AutoAb$SPARCStd #scale
+```
+
+```{r SB, warning=F, message=F,cache=TRUE}
+xgb_model <- map(SeedList, function(x) xgb_result(AutoAb,x,FALSE))
+RF_model <- map(SeedList, function(x) RF_result(AutoAb,x,FALSE))
+LR_model <- map(SeedList, function(x) LR_result(AutoAb,x,FALSE))
+svm_model <- map(SeedList, function(x) svm_result(AutoAb,x,FALSE))
+```
+
+```{r SBstk, warning=F, message=F,cache=TRUE}
+stk_model <- map(SeedList, function(x) stk_result(AutoAb,x,FALSE))
+```
+
+```{r}
+resultOutput(xgb_model,"XGBoost","SB")
+resultOutput(RF_model,"RF","SB")
+resultOutput(LR_model,"LR","SB")
+resultOutput(svm_model,"SVM","SB")
+resultOutput(stk_model,"Stacking","SB")
+```
+
+
+### Data processing strategy 12 (MFI : Standardized; Age : Ternary)
+Convert age to ternary format and standardize MFI level
+```{r}
+AutoAb$Age <- AutoAb$AgeT # Age = ternary
+AutoAb$ANXA2 <- AutoAb$ANXA2Std
+AutoAb$CA2 <- AutoAb$CA2Std
+AutoAb$HSPA5 <- AutoAb$HSPA5Std
+AutoAb$ISG15 <- AutoAb$ISG15Std
+AutoAb$KNG1 <- AutoAb$KNG1Std
+AutoAb$MMP1 <- AutoAb$MMP1Std
+AutoAb$MMP3 <- AutoAb$MMP3Std
+AutoAb$p53 <- AutoAb$p53Std
+AutoAb$PRDX2 <- AutoAb$PRDX2Std
+AutoAb$SPARC <- AutoAb$SPARCStd #scale
+```
+
+```{r ST, warning=F, message=F,cache=TRUE}
+xgb_model <- map(SeedList, function(x) xgb_result(AutoAb,x,FALSE))
+RF_model <- map(SeedList, function(x) RF_result(AutoAb,x,FALSE))
+LR_model <- map(SeedList, function(x) LR_result(AutoAb,x,FALSE))
+svm_model <- map(SeedList, function(x) svm_result(AutoAb,x,FALSE))
+```
+
+```{r STstk, warning=F, message=F,cache=TRUE}
+stk_model <- map(SeedList, function(x) stk_result(AutoAb,x,FALSE))
+```
+
+```{r}
+resultOutput(xgb_model,"XGBoost","ST")
+resultOutput(RF_model,"RF","ST")
+resultOutput(LR_model,"LR","ST")
+resultOutput(svm_model,"SVM","ST")
+resultOutput(stk_model,"Stacking","ST")
+```
+
+### Use patient characteristic alone to build model - LO
+log MFI level
+```{r}
+AutoAb$Age<- AutoAb$AgeOri 
+
+AutoAb$ANXA2 <- AutoAb$ANXA2Log
+AutoAb$CA2 <- AutoAb$CA2Log
+AutoAb$HSPA5 <- AutoAb$HSPA5Log
+AutoAb$ISG15 <- AutoAb$ISG15Log
+AutoAb$KNG1 <- AutoAb$KNG1Log
+AutoAb$MMP1 <- AutoAb$MMP1Log
+AutoAb$MMP3 <- AutoAb$MMP3Log
+AutoAb$p53 <- AutoAb$p53Log
+AutoAb$PRDX2 <- AutoAb$PRDX2Log
+AutoAb$SPARC <- AutoAb$SPARCLog #log10
+```
+
+```{r LOstkPatient, warning=F, message=F,cache=TRUE}
+stk_model <- map(SeedList, function(x) stk_result_ponly(AutoAb,x,FALSE))
+```
+
+```{r}
+resultOutput(stk_model,"Stacking","LOPatient")
+```
+
+Stop parallel processing:
+```{r}
+stopCluster(cl)
+```
+
+## Performance analysis
+
+### Load performance data
+```{r}
+source("Performance.R")
+PF <- read.csv("Performance_all.csv")
+PF$Algorithm <- factor(PF$Algorithm, levels = c("LR", "RF", "SVM", "XGBoost", "DNN", "Stacking"))
+PF$Seed <- factor(PF$Seed)
+PF$MFI <- factor(PF$MFI,levels=c("Original","Binary","Logarithmic","Standardized"))
+PF$Age <- factor(PF$Age,levels=c("Original","Binary","Ternary"))
+```
+
+### Table. Performance metrics
+```{r, warning=F,message=F}
+Perf<-
+  PF %>% group_by(Algorithm,MFI,Age) %>%
+  summarise(Count=n(),AUC=mean(ROC),AUC_sd=sd(ROC),
+            Sen=mean(Sensitivity),Sen_sd=sd(Sensitivity),
+            Spe=mean(Specificity),Spe_sd=sd(Specificity),
+            PPV_=mean(PPV),PPV_sd=sd(PPV),
+            NPV_=mean(NPV),NPV_sd=sd(NPV))%>%
+  mutate(AUCPrint=paste0(round(AUC,3),"|",round(AUC_sd,3)),# ± 
+         SensitivityPrint=paste0(round(Sen,3),"|",round(Sen_sd,3)),
+         SpecificityPrint=paste0(round(Spe,3),"|",round(Spe_sd,3)),
+         PPVPrint=paste0(round(PPV_,3),"|",round(PPV_sd,3)),
+         NPVPrint=paste0(round(NPV_,3),"|",round(NPV_sd,3)))
+write.csv(Perf,"FinalPerfTable.csv")
+FinalPerfTableWide<-Perf %>% dplyr::select(Algorithm,MFI,Age,AUCPrint)%>%
+  pivot_wider(id_cols = c("MFI","Age"),names_from = "Algorithm",values_from = "AUCPrint") 
+FinalPerfTableWide%>%  write.csv("FinalPerfTableWide.csv") 
+FinalPerfTableWide%>%knitr::kable() #Sup Table 3
+#knitr::kable(Perf %>% dplyr::select(Algorithm:Count,AUCPrint:NPVPrint) %>% 
+#               arrange(MFI,Age,Algorithm))
+
+```
+
+### Table. ANOVA
+```{r}
+res.aov <- anova_test(
+  data = PF, dv = ROC, wid = Seed,
+  within = c(Algorithm,MFI,Age)
+  )
+ANOVARes<-get_anova_table(res.aov)
+
+knitr::kable(ANOVARes) 
+```
+
+### Table. Holm-Bonferroni post hoc test 
+```{r}
+# Effect of algorithms at each data process methods
+one.way <- PF %>%
+  group_by(MFI,Age) %>%
+  anova_test(dv = ROC, wid = Seed, within = Algorithm) %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "holm")
+one.way %>%
+  knitr::kable()
+pwc <- PF %>%
+  group_by(MFI,Age) %>%
+  pairwise_t_test(
+    ROC ~ Algorithm, paired = TRUE,
+    p.adjust.method = "holm"
+    )
+pwc %>% filter(MFI=="Logarithmic" & Age=="Original")%>% 
+  dplyr::select(group1,group2,statistic,p,p.adj,p.adj.signif) %>%
+  mutate(p=round(p,4),p.adj=round(p.adj,4))%>%
+  knitr::kable() #Table 2
+```
+
+```{r}
+# Effect of MFI and Age processing at each algorithm
+#one.way2 <- PF %>%
+#  group_by(Algorithm) %>%
+#  anova_test(dv = ROC, wid = Seed, within = c(MFI,Age)) %>%
+#  get_anova_table() %>%
+#  adjust_pvalue(method = "holm")
+
+#one.way2%>%filter(Effect=="MFI:Age")%>%
+#  mutate(p=round(p,4),p.adj=round(p.adj,4))%>%
+#  knitr::kable() 
+# Pairwise comparisons between MFI and Age processing
+pwc2 <- PF %>%
+  mutate(Class=factor(Class,levels=paste0(rep(c("O","B","L","S"),each=3),c("O","B","T"))))%>%
+  group_by(Algorithm) %>%
+  pairwise_t_test(
+    ROC ~ Class, paired = TRUE,
+    p.adjust.method = "holm"
+    )
+
+pwc2 %>% filter(Algorithm=="Stacking") %>% 
+    dplyr::select(group1,group2,p.adj.signif) %>%
+    mutate(group1=factor(group1,levels = paste0(rep(c("O","B","L","S"),each=3),c("O","B","T"))))%>%
+    mutate(group2=factor(group2,levels = paste0(rep(c("O","B","L","S"),each=3),c("O","B","T")))) %>%
+  tidyr::pivot_wider(names_from = group1,values_from = p.adj.signif) %>%
+  knitr::kable() #Sup Table 4
+
+```
+
+
+
+
+### Use patient characteristic alone
+```{r}
+patientAlone<-read.csv("Output/Stacking5f_LOPatient_new.csv")
+PerfPatientAlone<-
+  patientAlone %>% group_by(Algorithm) %>%
+  summarise(Count=n(),AUC=mean(ROC),AUC_sd=sd(ROC),
+            Sen=mean(Sensitivity),Sen_sd=sd(Sensitivity),
+            Spe=mean(Specificity),Spe_sd=sd(Specificity),
+            PPV_=mean(PPV),PPV_sd=sd(PPV),
+            NPV_=mean(NPV),NPV_sd=sd(NPV))%>%
+  mutate(AUCPrint=paste0(round(AUC,3),"±",round(AUC_sd,3)),
+         SensitivityPrint=paste0(round(Sen,3),"±",round(Sen_sd,3)),
+         SpecificityPrint=paste0(round(Spe,3),"±",round(Spe_sd,3)),
+         PPVPrint=paste0(round(PPV_,3),"±",round(PPV_sd,3)),
+         NPVPrint=paste0(round(NPV_,3),"±",round(NPV_sd,3)))
+knitr::kable(PerfPatientAlone %>% 
+               dplyr::select(Algorithm:Count,AUCPrint:NPVPrint))
+
+LOANOVA<-rbind(PF %>%
+  filter(Class == "LO"&Algorithm=="Stacking") %>% 
+  dplyr::select(ROC,Class),
+  patientAlone %>% dplyr::select(ROC,Class))
+t.test(x = LOANOVA$ROC, g = LOANOVA$Class)
+pairwise.t.test(x = LOANOVA$ROC, 
+                g = LOANOVA$Class, 
+                p.adjust.method = "holm", 
+                paired = T)
+```
+
+### Figure. AUC boxplot
+```{r, fig.width=9,fig.height=7}
+b <- ggplot(PF, aes(Algorithm, ROC))
+b + stat_boxplot(geom = "errorbar", width = 0.3) + 
+  geom_boxplot(width = 0.5) +
+  theme_bw() + 
+  theme(panel.background = element_blank(), legend.position = "none", 
+        panel.grid.major = element_line(), panel.grid.minor = element_line(), 
+        axis.line = element_line(colour = "black")) +
+  facet_grid(MFI ~ Age, labeller = label_both)+labs(y="AUC") #Figure 3
+ggsave("AUCPlot.pdf",dev="pdf",width=9,height=7)
+```
+
+
+
+## Hyperparameter analysis
+
+```{r, warning=F,message=F}
+source("Hyperparameter.R")
+HPAll <- read.csv("HyperparameterAll_sum.csv")
+HPBest <- read.csv("HyperparameterBest_sum.csv")
+knitr::kable(HPAll %>% dplyr::select(-value,-Count) %>% unique()) #Sup Table 1
+```
+
+
+## Train the final model
+```{r, fig.width=8,fig.height=6}
+source("FinalModel.R")
+knitr::include_graphics("FinalVarImpLO.png") #Figure 4
+```
