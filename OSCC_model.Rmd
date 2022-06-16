@@ -583,15 +583,15 @@ pwc %>% filter(MFI=="Logarithmic" & Age=="Original")%>%
 
 ```{r}
 # Effect of MFI and Age processing at each algorithm
-#one.way2 <- PF %>%
-#  group_by(Algorithm) %>%
-#  anova_test(dv = ROC, wid = Seed, within = c(MFI,Age)) %>%
-#  get_anova_table() %>%
-#  adjust_pvalue(method = "holm")
+one.way2 <- PF %>%
+  group_by(Algorithm) %>%
+  anova_test(dv = ROC, wid = Seed, within = c(MFI,Age)) %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "holm")
 
-#one.way2%>%filter(Effect=="MFI:Age")%>%
-#  mutate(p=round(p,4),p.adj=round(p.adj,4))%>%
-#  knitr::kable() 
+one.way2%>%filter(Effect=="MFI:Age")%>%
+  mutate(p=round(p,4),p.adj=round(p.adj,4))%>%
+  knitr::kable() 
 # Pairwise comparisons between MFI and Age processing
 pwc2 <- PF %>%
   mutate(Class=factor(Class,levels=paste0(rep(c("O","B","L","S"),each=3),c("O","B","T"))))%>%

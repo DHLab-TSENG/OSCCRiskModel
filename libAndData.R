@@ -21,6 +21,7 @@ library(rstatix)
 library(tidyr)
 library(rstatix)
 library(forcats)
+library(vctrs)
 Path<-"Output/"
 AutoAb <- read_excel("AutoAb.xlsx")
 

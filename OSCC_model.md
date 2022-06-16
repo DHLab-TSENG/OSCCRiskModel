@@ -297,8 +297,8 @@ plot(cal_obj, type = "l", auto.key = list(columns = 4,
 dev.off() 
 ```
 
-    ## png 
-    ##   2
+    ## quartz_off_screen 
+    ##                 2
 
 ``` r
 plot(cal_obj, type = "l", auto.key = list(columns = 4,
@@ -629,15 +629,15 @@ ANOVARes<-get_anova_table(res.aov)
 knitr::kable(ANOVARes) 
 ```
 
-| Effect            | DFn |  DFd |      F |        p | p\<.05 |      ges |
-|:------------------|----:|-----:|-------:|---------:|:-------|---------:|
-| Algorithm         |   4 |  396 | 47.289 | 0.000000 | \*     | 0.048000 |
-| MFI               |   3 |  297 | 15.929 | 0.000000 | \*     | 0.011000 |
-| Age               |   2 |  198 |  8.303 | 0.000345 | \*     | 0.002000 |
-| Algorithm:MFI     |  12 | 1188 | 23.613 | 0.000000 | \*     | 0.013000 |
-| Algorithm:Age     |   8 |  792 |  8.119 | 0.000000 | \*     | 0.002000 |
-| MFI:Age           |   6 |  594 |  7.978 | 0.000000 | \*     | 0.000448 |
-| Algorithm:MFI:Age |  24 | 2376 |  9.024 | 0.000000 | \*     | 0.001000 |
+| Effect            |   DFn |     DFd |      F |        p | p\<.05 |      ges |
+|:------------------|------:|--------:|-------:|---------:|:-------|---------:|
+| Algorithm         |  2.94 |  290.68 | 47.289 | 0.00e+00 | \*     | 0.048000 |
+| MFI               |  1.16 |  115.21 | 15.929 | 4.86e-05 | \*     | 0.011000 |
+| Age               |  2.00 |  198.00 |  8.303 | 3.45e-04 | \*     | 0.002000 |
+| Algorithm:MFI     |  4.93 |  487.89 | 23.613 | 0.00e+00 | \*     | 0.013000 |
+| Algorithm:Age     |  5.06 |  500.72 |  8.119 | 2.00e-07 | \*     | 0.002000 |
+| MFI:Age           |  3.02 |  298.52 |  7.978 | 3.78e-05 | \*     | 0.000448 |
+| Algorithm:MFI:Age | 24.00 | 2376.00 |  9.024 | 0.00e+00 | \*     | 0.001000 |
 
 ### Table. Holm-Bonferroni post hoc test
 
@@ -695,15 +695,26 @@ pwc %>% filter(MFI=="Logarithmic" & Age=="Original")%>%
 
 ``` r
 # Effect of MFI and Age processing at each algorithm
-#one.way2 <- PF %>%
-#  group_by(Algorithm) %>%
-#  anova_test(dv = ROC, wid = Seed, within = c(MFI,Age)) %>%
-#  get_anova_table() %>%
-#  adjust_pvalue(method = "holm")
+one.way2 <- PF %>%
+  group_by(Algorithm) %>%
+  anova_test(dv = ROC, wid = Seed, within = c(MFI,Age)) %>%
+  get_anova_table() %>%
+  adjust_pvalue(method = "holm")
 
-#one.way2%>%filter(Effect=="MFI:Age")%>%
-#  mutate(p=round(p,4),p.adj=round(p.adj,4))%>%
-#  knitr::kable() 
+one.way2%>%filter(Effect=="MFI:Age")%>%
+  mutate(p=round(p,4),p.adj=round(p.adj,4))%>%
+  knitr::kable() 
+```
+
+| Algorithm | Effect  |  DFn |    DFd |      F |     p | p\<.05 |      ges |  p.adj |
+|:----------|:--------|-----:|-------:|-------:|------:|:-------|---------:|-------:|
+| LR        | MFI:Age | 6.00 | 594.00 |  5.601 | 0.000 | \*     | 0.000732 | 0.0001 |
+| RF        | MFI:Age | 3.26 | 322.46 |  1.695 | 0.164 |        | 0.000345 | 0.4920 |
+| SVM       | MFI:Age | 6.00 | 594.00 | 23.746 | 0.000 | \*     | 0.006000 | 0.0000 |
+| XGBoost   | MFI:Age | 6.00 | 594.00 |  2.558 | 0.019 | \*     | 0.000823 | 0.1330 |
+| Stacking  | MFI:Age | 4.14 | 409.63 |  2.631 | 0.032 | \*     | 0.000293 | 0.1920 |
+
+``` r
 # Pairwise comparisons between MFI and Age processing
 pwc2 <- PF %>%
   mutate(Class=factor(Class,levels=paste0(rep(c("O","B","L","S"),each=3),c("O","B","T"))))%>%
