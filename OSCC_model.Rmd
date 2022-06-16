@@ -180,7 +180,7 @@ resultOutput(stk_model,"Stacking","BT")
 ```
 
 
-### Data processing strategy 7 (MFI : Logarithm; Age : Original)
+### Data processing strategy 7 (MFI : Logarithm; Age : Original) - Best approach
 Use common log-transformed MFI level
 ```{r}
 AutoAb$Age<- AutoAb$AgeOri 
@@ -218,7 +218,7 @@ resultOutput(stk_model,"Stacking","LO")
 
 
 
-#### Figure. Lift and Calibration curve
+#### Lift plot
 ```{r, fig.width=9,fig.height=7,warning=F,message=F}
 stk_perf<-map_dfr(stk_model,3)
 stk_perf$Seed<-1:length(SeedList)
@@ -235,33 +235,35 @@ lift_results<-data.frame(Class=stk_model[[bestSeed[1]]]$Tst$Diagnosis,
 lift_results$Class<-factor(lift_results$Class,levels = c("H","L"))
 trellis.par.set(caretTheme())
 lift_obj <- caret::lift(Class ~ XGBoost + RF + SVM+LR+Stacking, data = lift_results)
-ggplot(lift_obj)+theme_bw()
-ggsave("GainLO.pdf",device="pdf",width = 7,height = 5)
+GainLO<-ggplot(lift_obj)+theme_bw()
+ggsave("GainLO.pdf",plot=GainLO,device="pdf",width = 7,height = 5)
 
-ggplot(lift_obj$data) +
+LiftLO<-ggplot(lift_obj$data) +
   geom_line(aes(CumTestedPct, lift, color = liftModelVar))+
   geom_hline(yintercept = 1, linetype='dotted')+
   theme_bw()+
   labs(color="Methods",x="% Tested",y="Lift")
-ggsave("LiftLO.pdf",device="pdf",width = 7,height = 5)
+ggsave("LiftLO.pdf",plot=LiftLO,device="pdf",width = 7,height = 5)
 
 two_class_lift <- lift_results %>% 
   pivot_longer(XGBoost:Stacking) %>%
   group_by(name)%>%
   lift_curve(Class, value) 
 lift_data<-two_class_lift %>%
-  group_by(name,.percent_tested = cut_interval(.percent_tested, n = 20)) %>%
+  group_by(name,.percent_tested = cut_interval(.percent_tested, n = 10)) %>%
   summarise(.lift = mean(.lift, na.rm = TRUE)) 
-lift_data %>% filter(.percent_tested=="[0,5]")
+lift_data %>% filter(.percent_tested=="[0,10]") %>% knitr::kable()
 lift_data %>%
   ggplot(aes(.percent_tested, .lift)) +
   geom_col() +
   geom_hline(yintercept = 1, linetype='dotted')+
   theme_bw() +
   facet_grid(name~.)+
-  labs(x = "% Tested", y = "Lift")
+  labs(x = "% Tested", y = "Lift") #Sup Figure 2
 ggsave("LiftLOBar.pdf",device="pdf",width = 8,height = 6)
-
+```
+####  Calibration curve
+```{r}
 trellis.par.set(caretTheme())
 cal_obj <- calibration(Class ~ XGBoost + RF + SVM+LR+Stacking,
                        data = lift_results,
@@ -273,12 +275,11 @@ plot(cal_obj, type = "l", auto.key = list(columns = 4,
 dev.off() 
 plot(cal_obj, type = "l", auto.key = list(columns = 4,
                                           lines = TRUE,
-                                          points = FALSE))
+                                          points = FALSE)) #Sup Figure 1
 ```
 
 #### Brier Score
 ```{r}
-
 o_t = 2-as.numeric(lift_results$Class)
 data.frame(Algorithm=c("Stacking","XGBoost","Random Forest","SVM","Logistic Regression"),
            BrierScore=c(mean((lift_results$Stacking - o_t)^2),
@@ -288,7 +289,6 @@ data.frame(Algorithm=c("Stacking","XGBoost","Random Forest","SVM","Logistic Regr
                         mean((lift_results$LR - o_t)^2))) %>%
   mutate(BrierScore=round(BrierScore,3)) %>%
   knitr::kable()
-
 ```
 
 
@@ -472,8 +472,8 @@ resultOutput(svm_model,"SVM","ST")
 resultOutput(stk_model,"Stacking","ST")
 ```
 
-### Use patient characteristic alone to build model - LO
-log MFI level
+### Use patient characteristic alone to build model (MFI : Logarithm; Age : Original)
+Use common log-transformed MFI level
 ```{r}
 AutoAb$Age<- AutoAb$AgeOri 
 
@@ -533,9 +533,19 @@ FinalPerfTableWide<-Perf %>% dplyr::select(Algorithm,MFI,Age,AUCPrint)%>%
   pivot_wider(id_cols = c("MFI","Age"),names_from = "Algorithm",values_from = "AUCPrint") 
 FinalPerfTableWide%>%  write.csv("FinalPerfTableWide.csv") 
 FinalPerfTableWide%>%knitr::kable() #Sup Table 3
-#knitr::kable(Perf %>% dplyr::select(Algorithm:Count,AUCPrint:NPVPrint) %>% 
-#               arrange(MFI,Age,Algorithm))
+```
 
+### Figure. AUC boxplot
+```{r, fig.width=9,fig.height=7}
+b <- ggplot(PF, aes(Algorithm, ROC))
+b + stat_boxplot(geom = "errorbar", width = 0.3) + 
+  geom_boxplot(width = 0.5) +
+  theme_bw() + 
+  theme(panel.background = element_blank(), legend.position = "none", 
+        panel.grid.major = element_line(), panel.grid.minor = element_line(), 
+        axis.line = element_line(colour = "black")) +
+  facet_grid(MFI ~ Age, labeller = label_both)+labs(y="AUC") #Figure 3
+ggsave("AUCPlot.pdf",dev="pdf",width=9,height=7)
 ```
 
 ### Table. ANOVA
@@ -632,18 +642,7 @@ pairwise.t.test(x = LOANOVA$ROC,
                 paired = T)
 ```
 
-### Figure. AUC boxplot
-```{r, fig.width=9,fig.height=7}
-b <- ggplot(PF, aes(Algorithm, ROC))
-b + stat_boxplot(geom = "errorbar", width = 0.3) + 
-  geom_boxplot(width = 0.5) +
-  theme_bw() + 
-  theme(panel.background = element_blank(), legend.position = "none", 
-        panel.grid.major = element_line(), panel.grid.minor = element_line(), 
-        axis.line = element_line(colour = "black")) +
-  facet_grid(MFI ~ Age, labeller = label_both)+labs(y="AUC") #Figure 3
-ggsave("AUCPlot.pdf",dev="pdf",width=9,height=7)
-```
+
 
 
 
@@ -658,7 +657,7 @@ knitr::kable(HPAll %>% dplyr::select(-value,-Count) %>% unique()) #Sup Table 1
 
 
 ## Train the final model
-```{r, fig.width=8,fig.height=6}
+```{r, fig.width=7,fig.height=5}
 source("FinalModel.R")
 knitr::include_graphics("FinalVarImpLO.png") #Figure 4
 ```

@@ -7,43 +7,6 @@ Yi-Ju Tseng, Yi-Cheng Wang, Pei-Chun Hsueh and Chih-Ching Wu
 
 ``` r
 source("libAndData.R")
-```
-
-    ## Warning: 套件 'dplyr' 是用 R 版本 4.1.3 來建造的
-
-    ## Warning: 套件 'MLmetrics' 是用 R 版本 4.1.3 來建造的
-
-    ## Warning: 套件 'randomForest' 是用 R 版本 4.1.3 來建造的
-
-    ## Warning: 套件 'caret' 是用 R 版本 4.1.3 來建造的
-
-    ## Warning: 套件 'kernlab' 是用 R 版本 4.1.3 來建造的
-
-    ## Warning: 套件 'rminer' 是用 R 版本 4.1.3 來建造的
-
-    ## Warning: 套件 'doParallel' 是用 R 版本 4.1.3 來建造的
-
-    ## Warning: 套件 'broom' 是用 R 版本 4.1.3 來建造的
-
-    ## Warning: 套件 'parsnip' 是用 R 版本 4.1.3 來建造的
-
-    ## Warning: 套件 'recipes' 是用 R 版本 4.1.3 來建造的
-
-    ## Warning: 套件 'tibble' 是用 R 版本 4.1.3 來建造的
-
-    ## Warning: 套件 'tune' 是用 R 版本 4.1.3 來建造的
-
-    ## Warning: 套件 'workflows' 是用 R 版本 4.1.3 來建造的
-
-    ## Warning: 套件 'stacks' 是用 R 版本 4.1.3 來建造的
-
-    ## Warning: 套件 'DALEXtra' 是用 R 版本 4.1.3 來建造的
-
-    ## Warning: 套件 'DALEX' 是用 R 版本 4.1.3 來建造的
-
-    ## Warning: 套件 'rstatix' 是用 R 版本 4.1.3 來建造的
-
-``` r
 SeedList <- c(4321:4420)
 ```
 
@@ -215,7 +178,7 @@ resultOutput(svm_model,"SVM","BT")
 resultOutput(stk_model,"Stacking","BT")
 ```
 
-### Data processing strategy 7 (MFI : Logarithm; Age : Original)
+### Data processing strategy 7 (MFI : Logarithm; Age : Original) - Best approach
 
 Use common log-transformed MFI level
 
@@ -253,7 +216,7 @@ resultOutput(svm_model,"SVM","LO")
 resultOutput(stk_model,"Stacking","LO")
 ```
 
-#### Figure. Lift and Calibration curve
+#### Lift plot
 
 ``` r
 stk_perf<-map_dfr(stk_model,3)
@@ -276,45 +239,33 @@ lift_results<-data.frame(Class=stk_model[[bestSeed[1]]]$Tst$Diagnosis,
 lift_results$Class<-factor(lift_results$Class,levels = c("H","L"))
 trellis.par.set(caretTheme())
 lift_obj <- caret::lift(Class ~ XGBoost + RF + SVM+LR+Stacking, data = lift_results)
-ggplot(lift_obj)+theme_bw()
-```
+GainLO<-ggplot(lift_obj)+theme_bw()
+ggsave("GainLO.pdf",plot=GainLO,device="pdf",width = 7,height = 5)
 
-![](OSCC_model_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
-
-``` r
-ggsave("GainLO.pdf",device="pdf",width = 7,height = 5)
-
-ggplot(lift_obj$data) +
+LiftLO<-ggplot(lift_obj$data) +
   geom_line(aes(CumTestedPct, lift, color = liftModelVar))+
   geom_hline(yintercept = 1, linetype='dotted')+
   theme_bw()+
   labs(color="Methods",x="% Tested",y="Lift")
-```
-
-![](OSCC_model_files/figure-gfm/unnamed-chunk-17-2.png)<!-- -->
-
-``` r
-ggsave("LiftLO.pdf",device="pdf",width = 7,height = 5)
+ggsave("LiftLO.pdf",plot=LiftLO,device="pdf",width = 7,height = 5)
 
 two_class_lift <- lift_results %>% 
   pivot_longer(XGBoost:Stacking) %>%
   group_by(name)%>%
   lift_curve(Class, value) 
 lift_data<-two_class_lift %>%
-  group_by(name,.percent_tested = cut_interval(.percent_tested, n = 20)) %>%
+  group_by(name,.percent_tested = cut_interval(.percent_tested, n = 10)) %>%
   summarise(.lift = mean(.lift, na.rm = TRUE)) 
-lift_data %>% filter(.percent_tested=="[0,5]")
+lift_data %>% filter(.percent_tested=="[0,10]") %>% knitr::kable()
 ```
 
-    ## # A tibble: 5 x 3
-    ## # Groups:   name [5]
-    ##   name     .percent_tested .lift
-    ##   <chr>    <fct>           <dbl>
-    ## 1 LR       [0,5]            1.79
-    ## 2 RF       [0,5]            1.79
-    ## 3 Stacking [0,5]            1.79
-    ## 4 SVM      [0,5]            1.79
-    ## 5 XGBoost  [0,5]            1.79
+| name     | .percent_tested |    .lift |
+|:---------|:----------------|---------:|
+| LR       | \[0,10\]        | 1.789474 |
+| RF       | \[0,10\]        | 1.789474 |
+| Stacking | \[0,10\]        | 1.789474 |
+| SVM      | \[0,10\]        | 1.789474 |
+| XGBoost  | \[0,10\]        | 1.789474 |
 
 ``` r
 lift_data %>%
@@ -323,14 +274,18 @@ lift_data %>%
   geom_hline(yintercept = 1, linetype='dotted')+
   theme_bw() +
   facet_grid(name~.)+
-  labs(x = "% Tested", y = "Lift")
+  labs(x = "% Tested", y = "Lift") #Sup Figure 2
 ```
 
-![](OSCC_model_files/figure-gfm/unnamed-chunk-17-3.png)<!-- -->
+![](OSCC_model_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 ``` r
 ggsave("LiftLOBar.pdf",device="pdf",width = 8,height = 6)
+```
 
+#### Calibration curve
+
+``` r
 trellis.par.set(caretTheme())
 cal_obj <- calibration(Class ~ XGBoost + RF + SVM+LR+Stacking,
                        data = lift_results,
@@ -348,10 +303,10 @@ dev.off()
 ``` r
 plot(cal_obj, type = "l", auto.key = list(columns = 4,
                                           lines = TRUE,
-                                          points = FALSE))
+                                          points = FALSE)) #Sup Figure 1
 ```
 
-![](OSCC_model_files/figure-gfm/unnamed-chunk-17-4.png)<!-- -->
+![](OSCC_model_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 #### Brier Score
 
@@ -560,9 +515,9 @@ resultOutput(svm_model,"SVM","ST")
 resultOutput(stk_model,"Stacking","ST")
 ```
 
-### Use patient characteristic alone to build model - LO
+### Use patient characteristic alone to build model (MFI : Logarithm; Age : Original)
 
-log MFI level
+Use common log-transformed MFI level
 
 ``` r
 AutoAb$Age<- AutoAb$AgeOri 
@@ -643,9 +598,23 @@ FinalPerfTableWide%>%knitr::kable() #Sup Table 3
 | Standardized | Binary   | 0.776\|0.055 | 0.757\|0.054 | 0.746\|0.056 | 0.778\|0.05  | 0.79\|0.054  |
 | Standardized | Ternary  | 0.77\|0.055  | 0.753\|0.058 | 0.754\|0.056 | 0.776\|0.049 | 0.787\|0.054 |
 
+### Figure. AUC boxplot
+
 ``` r
-#knitr::kable(Perf %>% dplyr::select(Algorithm:Count,AUCPrint:NPVPrint) %>% 
-#               arrange(MFI,Age,Algorithm))
+b <- ggplot(PF, aes(Algorithm, ROC))
+b + stat_boxplot(geom = "errorbar", width = 0.3) + 
+  geom_boxplot(width = 0.5) +
+  theme_bw() + 
+  theme(panel.background = element_blank(), legend.position = "none", 
+        panel.grid.major = element_line(), panel.grid.minor = element_line(), 
+        axis.line = element_line(colour = "black")) +
+  facet_grid(MFI ~ Age, labeller = label_both)+labs(y="AUC") #Figure 3
+```
+
+![](OSCC_model_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
+
+``` r
+ggsave("AUCPlot.pdf",dev="pdf",width=9,height=7)
 ```
 
 ### Table. ANOVA
@@ -827,25 +796,6 @@ pairwise.t.test(x = LOANOVA$ROC,
     ## 
     ## P value adjustment method: holm
 
-### Figure. AUC boxplot
-
-``` r
-b <- ggplot(PF, aes(Algorithm, ROC))
-b + stat_boxplot(geom = "errorbar", width = 0.3) + 
-  geom_boxplot(width = 0.5) +
-  theme_bw() + 
-  theme(panel.background = element_blank(), legend.position = "none", 
-        panel.grid.major = element_line(), panel.grid.minor = element_line(), 
-        axis.line = element_line(colour = "black")) +
-  facet_grid(MFI ~ Age, labeller = label_both)+labs(y="AUC") #Figure 3
-```
-
-![](OSCC_model_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
-
-``` r
-ggsave("AUCPlot.pdf",dev="pdf",width=9,height=7)
-```
-
 ## Hyperparameter analysis
 
 ``` r
@@ -874,12 +824,6 @@ knitr::kable(HPAll %>% dplyr::select(-value,-Count) %>% unique()) #Sup Table 1
 
 ``` r
 source("FinalModel.R")
-```
-
-    ## i Creating pre-processing data to finalize unknown parameter: mtry
-    ## i Creating pre-processing data to finalize unknown parameter: mtry
-
-``` r
 knitr::include_graphics("FinalVarImpLO.png") #Figure 4
 ```
 
