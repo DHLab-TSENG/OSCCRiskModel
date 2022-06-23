@@ -12,3 +12,5 @@ jobs:
           DATAVERSE_TOKEN: ${{secrets.DATAVERSE_TOKEN}}
           DATAVERSE_SERVER: https://dataverse.lib.nycu.edu.tw/
           DATAVERSE_DATASET_DOI: doi:10.57770/QTYQZS
+          DELETE: False
+          PUBLISH: True
