@@ -1,5 +1,4 @@
-Machine Learning-Based Risk Prediction Models of Oral Squamous Cell
-Carcinoma Using Saliva Autoantibody Biomarkers
+Machine Learning–Based Risk Prediction Models of Oral Squamous Cell Carcinoma Using Salivary Autoantibody Biomarkers
 ================
 Yi-Ju Tseng, Yi-Cheng Wang, Pei-Chun Hsueh and Chih-Ching Wu
 
