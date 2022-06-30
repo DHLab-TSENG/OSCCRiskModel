@@ -1,4 +1,4 @@
-# Machine Learning-Based Risk Prediction Models of Oral Squamous Cell Carcinoma Using Saliva Autoantibody Biomarkers
+# Machine Learning–Based Risk Prediction Models of Oral Squamous Cell Carcinoma Using Salivary Autoantibody Biomarkers
  
 [![](<https://img.shields.io/badge/Dataverse DOI-10.57770/QTYQZS-brightgreen>)](https://dataverse.lib.nycu.edu.tw/dataset.xhtml?persistentId=doi%3A10.57770%2FQTYQZS) 
  
