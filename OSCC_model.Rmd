@@ -1,5 +1,5 @@
 ---
-title: "Machine Learning-Based Risk Prediction Models of Oral Squamous Cell Carcinoma Using Saliva Autoantibody Biomarkers"
+title: "Machine Learning–Based Risk Prediction Models of Oral Squamous Cell Carcinoma Using Salivary Autoantibody Biomarkers"
 output: github_document
 author: "Yi-Ju Tseng, Yi-Cheng Wang, Pei-Chun Hsueh and Chih-Ching Wu"
 ---
